@@ -629,15 +629,24 @@ function drawCharacter(c,who,t,scale=1,showName=false){
   if(state==='dance'){rot=Math.sin(t*7)*.11;squashY=1+Math.sin(t*14)*.03}
   c.save();c.rotate(rot);c.scale(squashX,squashY);
   const longHair=LONG_HAIR.has(head.id);
-  if(longHair){
-    // Whole face + hair image is behind the body. No front-face re-pass: long hair never cuts over the outfit.
+  const longHairBackView=longHair&&dir==='up';
+
+  // Long-hair rule:
+  // - front/left/right: the whole hair+face sprite stays behind the body.
+  // - back view only (UP key): the back-hair sprite is drawn last so it becomes the front-most character layer.
+  if(longHair&&!longHairBackView){
     drawHead(c,head,dir,scale);
     drawBody(c,o,dir,state,t,scale);
   }else{
     drawBody(c,o,dir,state,t,scale);
-    drawHead(c,head,dir,scale);
+    if(!longHairBackView)drawHead(c,head,dir,scale);
   }
+
   if(state==='fish')drawFishingRod(c,dir,scale);else drawTool(c,dir,state,who.actionKind||state,t,scale);
+
+  // Only long-haired characters facing upward place the hair layer at the absolute front.
+  if(longHairBackView)drawHead(c,head,dir,scale);
+
   if(who.reaction&&performance.now()<who.reactionUntil){c.font=`${18*scale}px sans-serif`;c.textAlign='center';c.fillText(who.reaction==='ouch'?'✦ ! ✦':'♡',0,-152*scale)}
   c.restore();
   if(showName){c.font=`700 ${9*scale}px Inter,sans-serif`;c.textAlign='center';c.fillStyle='rgba(69,76,65,.72)';c.fillText(who.name||'friend',0,12*scale)}
