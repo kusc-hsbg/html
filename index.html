@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>PPOLPPOL WORLD — Craft & Explore · v5</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="app">
+  <main class="game-shell" id="gameShell">
+    <canvas id="game" aria-label="뽈뽈 월드"></canvas>
+
+    <div class="vignette"></div>
+    <div class="hud" id="hud">
+      <section class="profile-card glass" aria-label="플레이어 정보">
+        <button class="portrait-button" id="openCustomizer" title="캐릭터 변경"><span id="portraitHead"></span></button>
+        <div class="profile-copy">
+          <div class="profile-line"><strong id="playerNameLabel">Mongle</strong><span class="level-pill">Lv.<b id="levelText">1</b></span></div>
+          <div class="xp-row"><span class="xp-track"><i id="xpFill"></i></span><small id="xpText">0 / 80</small></div>
+          <div class="status-row"><span class="online-dot"></span><span>LOCAL GROVE</span><span class="tiny-sep"></span><span id="peerText">1 player</span></div>
+        </div>
+      </section>
+
+      <section class="day-card glass">
+        <div class="sun-orb"><i></i></div>
+        <div><small>GREEN MEADOW · DAY <b id="dayText">1</b></small><strong id="clockText">10:24 AM</strong></div>
+        <div class="weather-note">맑음</div>
+      </section>
+
+      <section class="resource-card glass" aria-label="재료">
+        <div class="resource"><span class="res-icon wood"></span><div><small>WOOD</small><b id="woodCount">0</b></div></div>
+        <div class="resource"><span class="res-icon stone"></span><div><small>STONE</small><b id="stoneCount">0</b></div></div>
+        <div class="resource"><span class="res-icon berry"></span><div><small>BERRY</small><b id="berryCount">0</b></div></div>
+        <div class="resource"><span class="res-icon fish"></span><div><small>FISH</small><b id="fishCount">0</b></div></div>
+        <div class="resource coin-res"><span class="res-icon coin"></span><div><small>COIN</small><b id="coinCount">0</b></div></div>
+      </section>
+
+      <nav class="left-rail" aria-label="메뉴">
+        <button class="rail-btn" data-panel="inventory" title="가방"><span class="glyph bag-glyph"></span><b>가방</b></button>
+        <button class="rail-btn" data-panel="craft" title="제작"><span class="glyph craft-glyph"></span><b>제작</b><i class="notice-dot" id="craftDot"></i></button>
+        <button class="rail-btn" data-panel="quests" title="오늘 할 일"><span class="glyph quest-glyph"></span><b>할 일</b></button>
+        <button class="rail-btn" id="customizerBtn" title="캐릭터"><span class="glyph face-glyph"></span><b>꾸미기</b></button>
+        <button class="rail-btn" data-panel="guide" title="도감"><span class="glyph book-glyph"></span><b>도감</b></button>
+      </nav>
+
+      <section class="mini-card glass">
+        <div class="mini-head"><strong>MEADOW MAP</strong><span id="coordText">1400 · 800</span></div>
+        <canvas id="minimap" width="220" height="138"></canvas>
+        <div class="mini-footer"><span><i class="mini-dot you"></i>YOU</span><span><i class="mini-dot tree"></i>TREE</span><span><i class="mini-dot rock"></i>ROCK</span><span><i class="mini-dot slime"></i>SLIME</span></div>
+      </section>
+
+      <section class="quest-peek glass" id="questPeek">
+        <div class="quest-peek-icon">✦</div>
+        <div><small>오늘의 모험</small><strong id="questPeekTitle">나무를 모아 나무검 만들기</strong><div class="quest-bar"><i id="questPeekFill"></i></div><span id="questPeekSub">나무 0 / 6</span></div>
+      </section>
+
+      <div class="panel glass" id="panel-inventory">
+        <header class="panel-header"><div><small>BACKPACK</small><h2>가방</h2><p>모은 재료와 장비를 한눈에 확인해요.</p></div><button class="panel-close" data-close>×</button></header>
+        <div class="panel-tabs"><button class="tab active" data-invtab="all">전체</button><button class="tab" data-invtab="materials">재료</button><button class="tab" data-invtab="gear">장비</button></div>
+        <div class="inventory-grid" id="inventoryGrid"></div>
+        <div class="bag-summary"><span>가방 사용량</span><b id="bagUsage">0 / 24</b></div>
+      </div>
+
+      <div class="panel glass craft-panel" id="panel-craft">
+        <header class="panel-header"><div><small>CRAFT TABLE</small><h2>제작소</h2><p>재료를 모아서 더 많은 일을 할 수 있는 장비를 만들어요.</p></div><button class="panel-close" data-close>×</button></header>
+        <div class="recipe-list" id="recipeList"></div>
+      </div>
+
+      <div class="panel glass" id="panel-quests">
+        <header class="panel-header"><div><small>TINY ADVENTURES</small><h2>오늘 할 일</h2><p>작은 목표를 하나씩 완료하면 코인과 경험치를 받아요.</p></div><button class="panel-close" data-close>×</button></header>
+        <div class="quest-list" id="questList"></div>
+      </div>
+
+      <div class="panel glass" id="panel-guide">
+        <header class="panel-header"><div><small>FIELD GUIDE</small><h2>초원 도감</h2><p>발견한 것과 아직 만나지 못한 콘텐츠를 확인해요.</p></div><button class="panel-close" data-close>×</button></header>
+        <div class="guide-grid" id="guideGrid"></div>
+      </div>
+
+      <section class="settings glass" id="settingsPanel">
+        <header><strong>설정</strong><button id="settingsClose">×</button></header>
+        <label><span>환경 애니메이션<small>꽃, 나무, 물결 움직임</small></span><button class="switch on" data-setting="ambient"><i></i></button></label>
+        <label><span>화면 흔들림<small>채집과 전투 피드백</small></span><button class="switch on" data-setting="shake"><i></i></button></label>
+        <label><span>효과음<small>가벼운 게임 효과음</small></span><button class="switch" data-setting="sound"><i></i></button></label>
+        <footer><button id="resetSave">저장 데이터 초기화</button></footer>
+      </section>
+
+      <div class="top-actions">
+        <button class="round-btn glass" id="settingsBtn" title="설정"><span class="settings-glyph"></span></button>
+        <button class="round-btn glass" id="fullscreenBtn" title="전체 화면"><span class="fullscreen-glyph"></span></button>
+      </div>
+
+      <div class="context-pill glass" id="contextPill">
+        <span class="context-icon" id="contextIcon">✦</span>
+        <div><strong id="contextTitle">산책하기</strong><small id="contextSub">WASD / 방향키로 움직여 보세요</small></div>
+        <kbd id="contextKey">E</kbd>
+      </div>
+
+      <div class="hotbar-wrap">
+        <div class="hotbar glass" id="hotbar"></div>
+        <div class="hotbar-label" id="hotbarLabel">맨손</div>
+      </div>
+
+      <div class="mobile-actions">
+        <button data-mobile-action="interact">USE</button>
+        <button data-mobile-action="attack">HIT</button>
+      </div>
+      <div class="joystick" id="joystick"><div id="joyKnob"></div></div>
+
+      <div class="fishing-ui glass" id="fishingUi">
+        <div class="fish-title"><span>FISHING</span><b id="fishHint">초록 영역에서 다시 눌러요!</b></div>
+        <div class="fish-track"><i class="fish-good" id="fishGood"></i><i class="fish-cursor" id="fishCursor"></i></div>
+        <div class="fish-key">F / X / E</div>
+      </div>
+
+      <div class="toast-stack" id="toastStack"></div>
+      <div class="float-layer" id="floatLayer"></div>
+    </div>
+
+    <section class="creator-backdrop" id="creatorBackdrop">
+      <div class="creator-modal">
+        <aside class="creator-preview">
+          <div class="creator-badge">CHARACTER STUDIO</div>
+          <div class="preview-stage"><canvas id="creatorCanvas" width="420" height="480"></canvas><div class="preview-shadow"></div></div>
+          <div class="direction-toggle">
+            <button data-preview-dir="down" class="active">앞</button><button data-preview-dir="left">옆</button><button data-preview-dir="up">뒤</button>
+          </div>
+          <div class="creator-tip">옆모습은 왼쪽 원본을 사용하고 오른쪽 이동 시 자연스럽게 반전됩니다.</div>
+        </aside>
+        <div class="creator-content">
+          <header><div><small>MY LITTLE EXPLORER</small><h1>오늘은 어떤 모습으로 놀까요?</h1><p>머리 스타일과 옷을 고르면 초원에서 바로 시작할 수 있어요.</p></div><button class="creator-x" id="creatorX">×</button></header>
+          <div class="creator-field"><label>이름</label><input id="nameInput" maxlength="12" value="Mongle" placeholder="이름을 입력하세요"></div>
+          <div class="creator-section-title"><span>01</span><div><b>머리 스타일</b><small>첨부한 머리커스텀 파일을 그대로 사용했어요.</small></div></div>
+          <div class="head-grid" id="headGrid"></div>
+          <div class="creator-section-title outfit-title"><span>02</span><div><b>옷 컬러</b><small>몸은 움직임에 맞춰 자연스럽게 그려져요.</small></div></div>
+          <div class="outfit-grid" id="outfitGrid"></div>
+          <div class="creator-footer"><button class="soft-btn" id="randomizeChar">랜덤</button><button class="primary-btn" id="saveCharacter">이 모습으로 시작하기 <span>→</span></button></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="start-curtain" id="startCurtain"><div class="logo-mark"><span></span><strong>PPOLPPOL</strong><small>CRAFT · EXPLORE · PLAY</small></div></section>
+  </main>
+</div>
+<script src="game.js"></script>
+</body>
+</html>
